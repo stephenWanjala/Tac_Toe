@@ -3,7 +3,6 @@ package com.github.stephenwanjala.tactoe
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
@@ -29,7 +28,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initButton(row: Int, column: Int): Button {
-        val button: Button = findViewById(resources.getIdentifier("btn_$row$column", "id", packageName))
+        val button: Button =
+            findViewById(resources.getIdentifier("btn_$row$column", "id", packageName))
         button.setOnClickListener(this)
         return button
     }
@@ -49,47 +49,72 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         movesCount++
 
         if (checkWin()) {
-            val winner = if (playerTurn) "Player 1 (X)" else "Player 2 (O)"
+            val winner = if (playerTurn) "Player" else "Computer"
             showResultDialog("Congratulations!", "$winner wins!")
             disableButtons()
         } else if (movesCount == 9) {
             showResultDialog("Draw!", "It's a draw!")
         } else {
             playerTurn = !playerTurn
+            if (!playerTurn) {
+                makeComputerMove()
+            }
+        }
+    }
+
+    private fun makeComputerMove() {
+        val emptyCells = mutableListOf<Pair<Int, Int>>()
+        for (row in buttons.indices) {
+            for (column in buttons[row].indices) {
+                if (buttons[row][column].text.toString() == "") {
+                    emptyCells.add(Pair(row, column))
+                }
+            }
+        }
+
+        if (emptyCells.isNotEmpty()) {
+            val randomIndex = (0 until emptyCells.size).random()
+            val (row, column) = emptyCells[randomIndex]
+            buttons[row][column].text = "O"
+            movesCount++
+
+            if (checkWin()) {
+                showResultDialog("Sorry!", "Computer wins!")
+                disableButtons()
+            } else if (movesCount == 9) {
+                showResultDialog("Draw!", "It's a draw!")
+            }
+
+            playerTurn = !playerTurn
         }
     }
 
     private fun checkWin(): Boolean {
-        val board = Array(3) { row ->
-            Array(3) { column ->
-                buttons[row][column].text.toString()
-            }
-        }
-
         // Check rows
-        for (i in 0 until 3) {
-            if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != "") {
+        for (row in buttons) {
+            if (row[0].text == row[1].text && row[0].text == row[2].text && row[0].text != "") {
                 return true
             }
         }
 
         // Check columns
-        for (i in 0 until 3) {
-            if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != "") {
+        for (column in buttons[0].indices) {
+            if (buttons[0][column].text == buttons[1][column].text && buttons[0][column].text == buttons[2][column].text && buttons[0][column].text != "") {
                 return true
             }
         }
 
         // Check diagonals
-        if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != "") {
+        if (buttons[0][0].text == buttons[1][1].text && buttons[0][0].text == buttons[2][2].text && buttons[0][0].text != "") {
             return true
         }
-        if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != "") {
+        if (buttons[0][2].text == buttons[1][1].text && buttons[0][2].text == buttons[2][0].text && buttons[0][2].text != "") {
             return true
         }
 
         return false
     }
+
 
     private fun disableButtons() {
         for (row in buttons) {
@@ -110,7 +135,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         movesCount = 0
     }
 
-
     private fun showResultDialog(title: String, message: String) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)
@@ -122,5 +146,3 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         builder.create().show()
     }
 }
-
-
