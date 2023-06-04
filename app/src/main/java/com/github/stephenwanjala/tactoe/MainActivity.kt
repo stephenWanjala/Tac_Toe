@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -49,10 +50,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         if (checkWin()) {
             val winner = if (playerTurn) "Player 1 (X)" else "Player 2 (O)"
-            Toast.makeText(this, "Congratulations! $winner wins!", Toast.LENGTH_SHORT).show()
+            showResultDialog("Congratulations!", "$winner wins!")
             disableButtons()
         } else if (movesCount == 9) {
-            Toast.makeText(this, "It's a draw!", Toast.LENGTH_SHORT).show()
+            showResultDialog("Draw!", "It's a draw!")
         } else {
             playerTurn = !playerTurn
         }
@@ -108,4 +109,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         playerTurn = true
         movesCount = 0
     }
+
+
+    private fun showResultDialog(title: String, message: String) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("New Game") { _, _ ->
+                resetGame()
+            }
+            .setCancelable(false)
+        builder.create().show()
+    }
 }
+
+
