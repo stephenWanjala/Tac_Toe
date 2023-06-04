@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:titleCondensed="@string/game_mode"
+        android:id="@+id/game_mode"
+        android:title="@string/game_mode"
+        app:showAsAction="always">
+
+        <menu>
+            <group android:id="@+id/group_dropdown">
+                <item
+                    android:id="@+id/menu_against_computer"
+                    android:title="@string/against_computer" />
+                <item
+                    android:id="@+id/menu_two_players"
+                    android:title="@string/two_players" />
+            </group>
+        </menu>
+    </item>
+
+</menu>

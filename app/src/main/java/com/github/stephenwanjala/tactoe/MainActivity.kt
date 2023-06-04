@@ -1,20 +1,32 @@
 package com.github.stephenwanjala.tactoe
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.MenuProvider
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
+class MainActivity : AppCompatActivity(), View.OnClickListener, MenuProvider {
     private lateinit var buttons: Array<Array<Button>>
     private var playerTurn = true
     private var movesCount = 0
+    private var isAgainstComputer = true
 
+
+    private lateinit var toolbar: Toolbar
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        toolbar = findViewById(R.id.toolbar)
+
+        toolbar.addMenuProvider(this, this)
         buttons = Array(3) { row ->
             Array(3) { column ->
                 initButton(row, column)
@@ -34,6 +46,30 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return button
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_two_players -> {
+                isAgainstComputer = false
+                resetGame()
+                true
+            }
+
+            R.id.menu_against_computer -> {
+                isAgainstComputer = true
+                resetGame()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
     override fun onClick(view: View) {
         val button = view as Button
         if (button.text.toString() != "") {
@@ -49,14 +85,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         movesCount++
 
         if (checkWin()) {
-            val winner = if (playerTurn) "Player" else "Computer"
+            val winner = if (playerTurn) {
+                if (isAgainstComputer) "Player" else "Player X"
+            } else {
+                "Player O"
+            }
             showResultDialog("Congratulations!", "$winner wins!")
             disableButtons()
         } else if (movesCount == 9) {
             showResultDialog("Draw!", "It's a draw!")
         } else {
             playerTurn = !playerTurn
-            if (!playerTurn) {
+            if (isAgainstComputer && !playerTurn) {
                 makeComputerMove()
             }
         }
@@ -115,7 +155,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return false
     }
 
-
     private fun disableButtons() {
         for (row in buttons) {
             for (button in row) {
@@ -133,6 +172,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
         playerTurn = true
         movesCount = 0
+
+        if (isAgainstComputer && !playerTurn) {
+            makeComputerMove()
+        }
     }
 
     private fun showResultDialog(title: String, message: String) {
@@ -144,5 +187,43 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
             .setCancelable(false)
         builder.create().show()
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_main, menu)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return when (menuItem.itemId) {
+            R.id.menu_against_computer -> {
+                isAgainstComputer = true
+                updateToolbarTitle()
+                showToast("Against Computer Mode Selected")
+                true
+            }
+
+            R.id.menu_two_players -> {
+                isAgainstComputer = false
+                updateToolbarTitle()
+                showToast("Two Players Mode Selected")
+                true
+            }
+
+            else -> false
+        }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun updateToolbarTitle() {
+        val gameModeText = if (isAgainstComputer) {
+            getString(R.string.against_computer)
+        } else {
+            getString(R.string.two_players)
+        }
+        val gameModeMenuItem = toolbar.menu.findItem(R.id.game_mode)
+        gameModeMenuItem.title = gameModeText
     }
 }
