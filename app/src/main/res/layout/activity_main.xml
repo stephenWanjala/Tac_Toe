@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:text="Tic Tac Toe"
+            android:text="@string/tic_tac_toe"
             android:textAlignment="center"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -126,7 +126,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:text="Reset"
+            android:text="@string/reset"
             android:textSize="20sp" />
 
     </LinearLayout>
